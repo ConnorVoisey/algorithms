@@ -27,10 +27,6 @@ int main() {
 
     std::cout << "Using max threads = " << *maxThreads << std::endl;
 
-    std::cout << "This test now uses multiple (10) loops to increase computation "
-                 "while maintaining low-ish RAM usage"
-              << std::endl;
-
     std::cout << "Memory usage is roughly 3GB. Waiting for 5 seconds to give you a "
                  "chance to Ctrl+C"
               << std::endl;
@@ -45,16 +41,14 @@ int main() {
 
         vvi grid(rows, vi(cols, 0));
 
-        // 1000 start points spread across the grid
+        // 1,000 start points spread across the grid
         vpii gridStarts;
-        for (int i = 0; i < 1000; i++) {
-            gridStarts.push_back({i * 1, i * 1});
+        for (int i = 0; i < 1'000; i++) {
+            gridStarts.push_back({i, i});
         }
 
         auto t1 = std::chrono::high_resolution_clock::now();
-        for (int i = 0; i < 10; i++) {
-            auto gridResults = multiGridBFS(grid, gridStarts, maxThreads);
-        }
+        auto gridResults = multiGridBFS(grid, gridStarts, maxThreads);
         auto t2 = std::chrono::high_resolution_clock::now();
 
         std::cout << "multiGridBFS (" << gridStarts.size() << " starts, " << rows * cols
@@ -69,11 +63,11 @@ int main() {
 
         // Sparse chain + some extra edges to make it interesting
         for (int i = 0; i < n - 1; i++) {
-            adj[i].push_back(i + 1);
-            adj[i + 1].push_back(i);
+            adj[(size_t)i].push_back(i + 1);
+            adj[(size_t)i + 1].push_back(i);
             if (i % 1000 == 0 && i + 100 < n) {
-                adj[i].push_back(i + 100);
-                adj[i + 100].push_back(i);
+                adj[(size_t)i].push_back(i + 100);
+                adj[(size_t)i + 100].push_back(i);
             }
         }
 
@@ -84,9 +78,7 @@ int main() {
         }
 
         auto t1 = std::chrono::high_resolution_clock::now();
-        for (int i = 0; i < 10; i++) {
-            auto adjResults = multiBFS(adj, adjStarts, maxThreads);
-        }
+        auto adjResults = multiBFS(adj, adjStarts, maxThreads);
         auto t2 = std::chrono::high_resolution_clock::now();
 
         std::cout << "multiBFS (" << adjStarts.size() << " starts, " << n

@@ -22,11 +22,11 @@ struct ThreadJoiner {
  * Multi-threaded wrapper for BFS.
  * Each start point runs BFS independently in a separate thread.
  */
-template <typename T, typename U, typename V>
-inline T threadWrapper(const U &adj, const V &starts,
-                       std::optional<size_t> maxThreads = std::nullopt) {
-    size_t n = starts.size();
-    T results(n);
+template <typename V>
+inline vvi threadWrapper(const vvi &adj, const V &starts,
+                         std::optional<size_t> maxThreads = std::nullopt) {
+    const size_t n = starts.size();
+    vvi results(n);
 
     const size_t max_threads =
         maxThreads ? std::max((size_t)1, *maxThreads)
@@ -55,10 +55,10 @@ inline T threadWrapper(const U &adj, const V &starts,
                     }
                     if constexpr (std::is_same_v<typename V::value_type, pii>) {
                         auto [row, col] = starts[at];
-                        results[at] = gridBFS(adj, row, col);
+                        results[at] = gridBFS(adj, (size_t)row, (size_t)col);
                     } else {
                         auto start = starts[at];
-                        results[at] = adjBFS(adj, start);
+                        results[at] = adjBFS(adj, (size_t)start);
                     }
                 }
             });
@@ -73,11 +73,11 @@ inline T threadWrapper(const U &adj, const V &starts,
  */
 inline vvi multiBFS(const vvi &adj, const vi &starts,
                     std::optional<size_t> maxThreads = std::nullopt) {
-    return threadWrapper<vvi, vvi, vi>(adj, starts, maxThreads);
+    return threadWrapper<vi>(adj, starts, maxThreads);
 }
-inline vvvi multiGridBFS(const vvi &grid, const vpii &starts,
-                         std::optional<size_t> maxThreads = std::nullopt) {
-    return threadWrapper<vvvi, vvi, vpii>(grid, starts, maxThreads);
+inline vvi multiGridBFS(const vvi &grid, const vpii &starts,
+                        std::optional<size_t> maxThreads = std::nullopt) {
+    return threadWrapper<vpii>(grid, starts, maxThreads);
 }
 
 } // namespace algo::bfs

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <queue>
 #include <utility>
 #include <vector>
@@ -8,6 +9,7 @@
 namespace algo::bfs {
 
 using vi = std::vector<int>;
+using vui = std::vector<uint8_t>;
 using vvi = std::vector<vi>;
 using vvvi = std::vector<vvi>;
 using pii = std::pair<int, int>;
@@ -19,28 +21,29 @@ using vvpii = std::vector<vpii>;
  * nodes.
  * Thread safe, so can be called concurrently to do a multi-source BFS.
  */
-inline vi adjBFS(const vvi &adj, const int start) {
-    size_t n = adj.size();
+inline vi adjBFS(const vvi &adj, const size_t start) {
+    const size_t n = adj.size();
 
     // Track distance and whether a node has been visited (to prevent infinite loops)
-    vi visited(n, 0);
+    vui visited(n, 0);
     vi distances(n, -1);
 
-    std::queue<int> q;
+    std::queue<size_t> q;
     q.push(start);
     visited[start] = 1;   // Visit the start
     distances[start] = 0; // Back to itself = 0
 
     while (!q.empty()) {
-        int next = q.front();
+        const size_t next = q.front();
         q.pop();
 
         for (const int &neighbour : adj[next]) {
-            if (visited[neighbour] == 0) { // Only process if this is the first time
-                visited[neighbour] = 1;    // We are now visiting this node
-                distances[neighbour] = distances[next] + 1; // One more hop
-                q.push(neighbour);
+            if (visited[(size_t)neighbour] == 1) {
+                continue; // Only process if this is the first time
             }
+            visited[(size_t)neighbour] = 1; // We are now visiting this node
+            distances[(size_t)neighbour] = distances[next] + 1; // One more hop
+            q.push((size_t)neighbour);
         }
     }
 
@@ -51,36 +54,39 @@ inline vi adjBFS(const vvi &adj, const int start) {
  * So this is pretty much the same idea as above, but we are moving in set directions,
  * instead of using an adjacency list of neighbours.
  */
-inline vvi gridBFS(const vvi &grid, const int startRow, const int startCol) {
-    int r = (int)grid.size();
-    int c = (int)grid[0].size();
+inline vi gridBFS(const vvi &grid, const size_t startRow, const size_t startCol) {
+    const size_t r = grid.size();
+    const size_t c = grid[0].size();
 
-    vvi visited(r, vi(c, 0));
-    vvi distances(r, vi(c, -1));
+    vui visited((r * c), 0);
+    vi distances((r * c), -1);
 
-    int dr[] = {-1, 1, 0, 0};
-    int dc[] = {0, 0, -1, 1};
+    const int dr[] = {-1, 1, 0, 0};
+    const int dc[] = {0, 0, -1, 1};
 
     std::queue<pii> q;
     q.push({startRow, startCol});
-    visited[startRow][startCol] = 1;
-    distances[startRow][startCol] = 0;
+    visited[startRow * c + startCol] = 1;
+    distances[startRow * c + startCol] = 0;
 
     while (!q.empty()) {
         auto [row, col] = q.front();
         q.pop();
-        for (int d = 0; d < 4; d++) {
-            int nr = dr[d] + row;
-            int nc = dc[d] + col;
-            if (nr < 0 || nr >= r)
+        for (size_t d = 0; d < 4; d++) {
+            const int nr = dr[d] + row;
+            const int nc = dc[d] + col;
+            if (nr < 0 || nr >= (int)r)
                 continue;
-            if (nc < 0 || nc >= c)
+            if (nc < 0 || nc >= (int)c)
                 continue;
-            if (visited[nr][nc] == 0) {
-                visited[nr][nc] = 1;
-                distances[nr][nc] = distances[row][col] + 1;
-                q.push({nr, nc});
+            size_t flattened = (size_t)nr * c + (size_t)nc;
+            // Flatten the vector to improve cache locality
+            if (visited[flattened] == 1) {
+                continue;
             }
+            visited[flattened] = 1;
+            distances[flattened] = distances[(size_t)row * c + (size_t)col] + 1;
+            q.push({nr, nc});
         }
     }
 
