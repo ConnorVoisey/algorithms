@@ -14,10 +14,10 @@ int main() {
     const vi starts = {0, 4};
 
     std::cout << "multiBFS results:" << std::endl;
-    const vvi bfsResults = multiBFS(adj, starts);
+    const vvll bfsResults = multiBFS(adj, starts);
     for (size_t i = 0; i < bfsResults.size(); ++i) {
         std::cout << "From start " << starts[i] << ": ";
-        for (int d : bfsResults[i])
+        for (ll d : bfsResults[i])
             std::cout << d << " ";
         std::cout << std::endl;
     }
@@ -31,7 +31,7 @@ int main() {
     const vpii gridStarts = {{0, 0}, {2, 2}};
 
     std::cout << std::endl << "multiGridBFS results:" << std::endl;
-    const vvi gridResults = multiGridBFS(grid, gridStarts);
+    const vvll gridResults = multiGridBFS(grid, gridStarts);
     size_t rows = grid.size();
     size_t cols = grid[0].size();
     for (size_t i = 0; i < gridResults.size(); ++i) {
@@ -39,7 +39,7 @@ int main() {
                   << "):" << std::endl;
         for (size_t r = 0; r < rows; r++) {
             for (size_t c = 0; c < cols; c++) {
-                const int dist = gridResults[i][r * cols + c];
+                const ll dist = gridResults[i][r * cols + c];
                 std::cout << dist << "\t";
             }
             std::cout << std::endl;

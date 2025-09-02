@@ -23,14 +23,14 @@ struct ThreadJoiner {
  * Each start point runs BFS independently in a separate thread.
  */
 template <typename V>
-inline vvi threadWrapper(const vvi &adj, const V &starts,
-                         std::optional<size_t> maxThreads = std::nullopt) {
+inline vvll threadWrapper(const vvi &adj, const V &starts,
+                          std::optional<size_t> maxThreads = std::nullopt) {
     const size_t n = starts.size();
-    vvi results(n);
+    vvll results(n);
 
     const size_t max_threads =
-        maxThreads ? std::max((size_t)1, *maxThreads)
-                   : std::max((size_t)1, (size_t)std::thread::hardware_concurrency());
+        maxThreads ? std::max(stcast(1), *maxThreads)
+                   : std::max(stcast(1), stcast(std::thread::hardware_concurrency()));
     std::queue<size_t> q;
     for (size_t i = 0; i < n; i++) {
         q.push(i);
@@ -55,10 +55,10 @@ inline vvi threadWrapper(const vvi &adj, const V &starts,
                     }
                     if constexpr (std::is_same_v<typename V::value_type, pii>) {
                         auto [row, col] = starts[at];
-                        results[at] = gridBFS(adj, (size_t)row, (size_t)col);
+                        results[at] = gridBFS(adj, stcast(row), stcast(col));
                     } else {
                         auto start = starts[at];
-                        results[at] = adjBFS(adj, (size_t)start);
+                        results[at] = adjBFS(adj, stcast(start));
                     }
                 }
             });
@@ -71,12 +71,12 @@ inline vvi threadWrapper(const vvi &adj, const V &starts,
 /**
  * Wrappers to avoid template params.
  */
-inline vvi multiBFS(const vvi &adj, const vi &starts,
-                    std::optional<size_t> maxThreads = std::nullopt) {
+inline vvll multiBFS(const vvi &adj, const vi &starts,
+                     std::optional<size_t> maxThreads = std::nullopt) {
     return threadWrapper<vi>(adj, starts, maxThreads);
 }
-inline vvi multiGridBFS(const vvi &grid, const vpii &starts,
-                        std::optional<size_t> maxThreads = std::nullopt) {
+inline vvll multiGridBFS(const vvi &grid, const vpii &starts,
+                         std::optional<size_t> maxThreads = std::nullopt) {
     return threadWrapper<vpii>(grid, starts, maxThreads);
 }
 
